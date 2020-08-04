@@ -10,13 +10,20 @@ const readFromDb = async (file) => {
     return notes;
 };
 
-const writeToDb = async (file, data, options = {flag: `a`}) => {
+const writeToDb = async (file, data, options = {flag: `w`}) => {
     await writeFile(file, data, options);
 }
 
+let entryId = 0;
+const generateId = () => {
+    entryId += 1;
+    return entryId;
+};
+
 const dbUtils = {
     readFromDb: readFromDb,
-    writeToDb: writeToDb
+    writeToDb: writeToDb,
+    generateId: generateId,
 }
 
 module.exports = dbUtils;

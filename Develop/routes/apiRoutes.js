@@ -3,17 +3,28 @@ const dbUtils = require(path.join(__dirname, `../db/data`));
 
 const db = path.join(__dirname, `../db/db.json`);
 
-const { allowedNodeEnvironmentFlags } = require("process");
-const { fstat } = require("fs");
-
 handleApiRoutes = (app) => {
     app.get(`/api/notes`, (req, res) => {
         res.sendFile(db);
     });
 
     app.post(`/api/notes`, (req, res) => {
-        console.log(typeof(req.body));
-        dbUtils.writeToDb(db, JSON.stringify(req.body));
+        const note = req.body;
+        note.id = dbUtils.generateId();
+        dbUtils.readFromDb(db).then(data => {
+            data.push(note);
+            dbUtils.writeToDb(db, JSON.stringify(data));
+            res.json(note);
+        });
+    });
+
+    app.delete(`/api/notes/:id`, (req, res) => {
+        const id = parseInt(req.params.id);
+        dbUtils.readFromDb(db).then(data => {
+            const newData = data.filter((item) => {if (item.id !== id) return true;});
+            dbUtils.writeToDb(db, JSON.stringify(newData));
+            res.json({ ok: true });
+        });
     });
 };
 
